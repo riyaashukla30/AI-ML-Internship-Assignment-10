@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heart Disease Risk Predictor</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="pulse-icon">
+      <svg viewBox="0 0 100 30" class="pulse-svg">
+        <polyline points="0,15 20,15 27,3 34,27 41,15 100,15" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Heart Disease Risk Predictor</h1>
+      <p class="subtitle">Clinical parameter based screening tool &mdash; ML powered</p>
+    </div>
+  </header>
+
+  <main>
+    <form id="predict-form" class="card">
+      <div class="grid">
+
+        <label class="field">
+          <span>Age (years)</span>
+          <input type="number" name="age" min="1" max="120" placeholder="e.g. 45" required>
+        </label>
+
+        <label class="field">
+          <span>Sex</span>
+          <select name="sex" required>
+            <option value="" selected disabled>Select…</option>
+            <option value="1">Male</option>
+            <option value="0">Female</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Chest Pain Type (cp)</span>
+          <select name="cp" required>
+            <option value="" selected disabled>Select…</option>
+            <option value="0">Typical angina</option>
+            <option value="1">Atypical angina</option>
+            <option value="2">Non-anginal pain</option>
+            <option value="3">Asymptomatic</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Resting Blood Pressure (trestbps)</span>
+          <input type="number" name="trestbps" min="50" max="260" placeholder="e.g. 120" required>
+        </label>
+
+        <label class="field">
+          <span>Serum Cholesterol (chol, mg/dl)</span>
+          <input type="number" name="chol" min="80" max="700" placeholder="e.g. 200" required>
+        </label>
+
+        <label class="field">
+          <span>Fasting Blood Sugar &gt; 120 mg/dl (fbs)</span>
+          <select name="fbs" required>
+            <option value="" selected disabled>Select…</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Resting ECG (restecg)</span>
+          <select name="restecg" required>
+            <option value="" selected disabled>Select…</option>
+            <option value="0">Normal</option>
+            <option value="1">ST-T abnormality</option>
+            <option value="2">Left ventricular hypertrophy</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Max Heart Rate Achieved (thalach)</span>
+          <input type="number" name="thalach" min="50" max="250" placeholder="e.g. 140" required>
+        </label>
+
+        <label class="field">
+          <span>Exercise Induced Angina (exang)</span>
+          <select name="exang" required>
+            <option value="" selected disabled>Select…</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>ST Depression (oldpeak)</span>
+          <input type="number" step="0.1" name="oldpeak" min="0" max="10" placeholder="e.g. 1.5" required>
+        </label>
+
+        <label class="field">
+          <span>Slope of Peak Exercise ST (slope)</span>
+          <select name="slope" required>
+            <option value="" selected disabled>Select…</option>
+            <option value="0">Upsloping</option>
+            <option value="1">Flat</option>
+            <option value="2">Downsloping</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Major Vessels Colored (ca)</span>
+          <select name="ca" required>
+            <option value="" selected disabled>Select…</option>
+            <option value="0">0</option><option value="1">1</option>
+            <option value="2">2</option><option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Thalassemia (thal)</span>
+          <select name="thal" required>
+            <option value="" selected disabled>Select…</option>
+            <option value="0">Normal</option>
+            <option value="1">Fixed defect</option>
+            <option value="2">Reversible defect</option>
+            <option value="3">Unknown</option>
+          </select>
+        </label>
+
+      </div>
+
+      <button type="submit" id="predict-btn">Predict Risk</button>
+    </form>
+
+    <section id="result" class="result-card hidden">
+      <div id="result-icon" class="result-icon"></div>
+      <div>
+        <p id="result-text" class="result-text"></p>
+        <p id="result-confidence" class="result-confidence"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built with Flask &amp; scikit-learn &middot; Assignment 10 &mdash; End-to-End ML Deployment</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('predict-form');
+    const resultSection = document.getElementById('result');
+    const resultIcon = document.getElementById('result-icon');
+    const resultText = document.getElementById('result-text');
+    const resultConfidence = document.getElementById('result-confidence');
+    const btn = document.getElementById('predict-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.textContent = 'Predicting…';
+      btn.disabled = true;
+
+      const formData = new FormData(form);
+      const payload = {};
+      formData.forEach((value, key) => payload[key] = value);
+
+      try {
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        resultSection.classList.remove('hidden');
+        if (data.error) {
+          resultSection.className = 'result-card error';
+          resultText.textContent = 'Error: ' + data.error;
+          resultConfidence.textContent = '';
+        } else {
+          const isPositive = data.prediction.toLowerCase().includes('detected');
+          resultSection.className = 'result-card ' + (isPositive ? 'positive' : 'negative');
+          resultIcon.textContent = isPositive ? '⚠' : '✓';
+          resultText.textContent = data.prediction;
+          resultConfidence.textContent = 'Model confidence: ' + data.confidence + '%';
+        }
+        resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        resultSection.classList.remove('hidden');
+        resultSection.className = 'result-card error';
+        resultText.textContent = 'Request failed. Please try again.';
+        resultConfidence.textContent = '';
+      }
+
+      btn.textContent = 'Predict Risk';
+      btn.disabled = false;
+    });
+  </script>
+
+</body>
+</html>
