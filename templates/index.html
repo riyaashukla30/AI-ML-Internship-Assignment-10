@@ -1,54 +1,145 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Heart Disease Prediction</title>
+    <title>Heart Disease Predictor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-    <div class="container">
-        <h1>❤️ Heart Disease Prediction</h1>
 
-        <form id="predictionForm">
-            {% for col in columns %}
-                <label>{{ col }}</label>
-                <input type="number" name="{{ col }}" step="any" required>
-            {% endfor %}
+<div class="header">
+    <h1>💙 Heart Disease Risk Predictor</h1>
+    <p>Clinical parameter based screening tool — ML powered</p>
+</div>
 
-            <button type="submit">Predict</button>
-        </form>
+<div class="container">
+    <form id="predictionForm">
 
-        <h2 id="result"></h2>
-    </div>
+        <div class="grid">
 
-    <script>
-        document.getElementById("predictionForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
+            <div>
+                <label>Age</label>
+                <input type="number" name="age" required>
+            </div>
 
-            let formData = new FormData(this);
-            let data = {};
+            <div>
+                <label>Sex</label>
+                <select name="sex">
+                    <option value="1">Male</option>
+                    <option value="0">Female</option>
+                </select>
+            </div>
 
-            formData.forEach((value, key) => {
-                data[key] = parseFloat(value);
-            });
+            <div>
+                <label>Chest Pain Type</label>
+                <select name="cp">
+                    <option value="0">Typical Angina</option>
+                    <option value="1">Atypical Angina</option>
+                    <option value="2">Non-anginal</option>
+                    <option value="3">Asymptomatic</option>
+                </select>
+            </div>
 
-            let response = await fetch("/predict", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            });
+            <div>
+                <label>Resting BP</label>
+                <input type="number" name="trestbps">
+            </div>
 
-            let result = await response.json();
+            <div>
+                <label>Cholesterol</label>
+                <input type="number" name="chol">
+            </div>
 
-            if(result.error){
-                document.getElementById("result").innerText = "Error: " + result.error;
-            } else {
-                document.getElementById("result").innerText =
-                    result.prediction + " (" + result.confidence + "% confidence)";
-            }
-        });
-    </script>
+            <div>
+                <label>Fasting Blood Sugar</label>
+                <select name="fbs">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Rest ECG</label>
+                <select name="restecg">
+                    <option value="0">Normal</option>
+                    <option value="1">ST-T abnormality</option>
+                    <option value="2">Hypertrophy</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Max Heart Rate</label>
+                <input type="number" name="thalach">
+            </div>
+
+            <div>
+                <label>Exercise Angina</label>
+                <select name="exang">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Oldpeak</label>
+                <input type="number" step="0.1" name="oldpeak">
+            </div>
+
+            <div>
+                <label>Slope</label>
+                <select name="slope">
+                    <option value="0">Upsloping</option>
+                    <option value="1">Flat</option>
+                    <option value="2">Downsloping</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Major Vessels</label>
+                <input type="number" name="ca">
+            </div>
+
+            <div>
+                <label>Thal</label>
+                <select name="thal">
+                    <option value="1">Normal</option>
+                    <option value="2">Fixed Defect</option>
+                    <option value="3">Reversible Defect</option>
+                </select>
+            </div>
+
+        </div>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    <div id="result"></div>
+
+</div>
+
+<script>
+document.getElementById("predictionForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    let data = {};
+
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
+    const response = await fetch("/predict", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    document.getElementById("result").innerHTML =
+        `<h2>${result.prediction}</h2>
+         <p>Confidence: ${result.confidence}%</p>`;
+});
+</script>
+
 </body>
 </html>
