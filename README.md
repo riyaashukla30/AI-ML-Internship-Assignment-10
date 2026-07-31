@@ -16,6 +16,11 @@ This project is a Heart Disease Prediction Web Application built using Machine L
 It predicts whether a person is likely to have heart disease based on medical parameters like age, cholesterol, blood pressure, etc.
 
 ---
+## Screenshots
+<img width="1365" height="673" alt="image" src="https://github.com/user-attachments/assets/b3d62649-a8a5-414f-a664-05ed0cf23c11" />
+<img width="1365" height="724" alt="image" src="https://github.com/user-attachments/assets/dd3d5beb-8599-4657-a3de-d20f96e5fdb4" />
+
+---
 
 ## 🧠 Technologies Used
 
@@ -79,10 +84,4 @@ This project shows how Machine Learning can be used in real-world healthcare app
 
 ---
 
-## 🙌 Acknowledgement
 
-Thanks to MPOnline AI/ML Internship for providing this opportunity.
-
----
-
-#MachineLearning #Flask #AI #MPOnlineLimited
